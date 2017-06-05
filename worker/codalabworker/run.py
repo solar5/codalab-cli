@@ -119,7 +119,6 @@ class Run(object):
         }
         if not self._bundle_service.resume_bundle(self._worker.id, self._uuid,
                                                  start_message):
-            print("false!!")
             return False
 
         # Start a thread for this run.
@@ -127,7 +126,7 @@ class Run(object):
             Run._safe_update_run_status(self, 'Running')
             Run._monitor(self)
 
-        print("resuming bundle {}, container {}".format(self._uuid, self._container_id))
+        logger.debug("resuming bundle {}, container {}".format(self._uuid, self._container_id))
         threading.Thread(target=resume_run, args=[self]).start()
 
     def _safe_update_docker_image(self, docker_image):
