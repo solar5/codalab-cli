@@ -29,7 +29,8 @@ def checkin(worker_id):
     if (not torque_worker and
         request.json['version'] != VERSION and
         not request.json['will_upgrade']):
-        print("WORKER VERSION: {} vs {}".format(request.json['version'], VERSION))
+        with open('/var/log/temp', 'w') as f:
+            f.write("WORKER VERSION: {} vs {}".format(request.json['version'], VERSION))
         return {'type': 'upgrade'}
 
     socket_id = local.worker_model.worker_checkin(
