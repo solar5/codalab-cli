@@ -308,7 +308,7 @@ class Worker(object):
             traceback.print_exc()
 
     def _upgrade(self):
-        logger.debug('Upgrading')
+        print('Upgrading')
         worker_dir = os.path.dirname(os.path.realpath(__file__))
 
         while True:
