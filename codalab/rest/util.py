@@ -189,7 +189,7 @@ def get_group_info(group_spec, need_admin, access_all_groups=False):
         group_info = unique_group(local.model, group_spec, user_id=None)
     else:
         group_info = unique_group(local.model, group_spec, user_id=user_id)
-    abort(httplib.FORBIDDEN, 'is_root: %s, group_info: %s.' % (is_root_user, group_info))
+        abort(httplib.FORBIDDEN, 'is_root: %s, group_info: %s.' % (is_root_user, group_info))
 
 
     # If not root and need admin access, but don't have it, raise error.
