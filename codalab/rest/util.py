@@ -185,10 +185,11 @@ def get_group_info(group_spec, need_admin, access_all_groups=False):
     is_root_user = (user_id == local.model.root_user_id)
 
     # If we're root, then we can access any group.
-    if is_root_user or access_all_groups:
-        group_info = unique_group(local.model, group_spec, user_id=None)
-    else:
-        group_info = unique_group(local.model, group_spec, user_id=user_id)
+    #if is_root_user or access_all_groups:
+    #    group_info = unique_group(local.model, group_spec, user_id=None)
+    #else:
+    #    group_info = unique_group(local.model, group_spec, user_id=user_id)
+    group_info = unique_group(local.model, group_spec, user_id=user_id)
     abort(httplib.FORBIDDEN, 'is_root: %s, group_info: %s.' % (is_root_user, group_info))
 
 
