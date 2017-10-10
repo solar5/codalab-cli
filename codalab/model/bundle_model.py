@@ -1263,7 +1263,7 @@ class BundleModel(object):
 
         # Union
         q0 = union(*filter(lambda q : q is not None, [q0, q1, q2]))
-        print "QUERY: ", str(q0)
+        print >>sys.stderr, "QUERY: ", str(q0)
 
         with self.engine.begin() as connection:
             rows = connection.execute(q0).fetchall()
