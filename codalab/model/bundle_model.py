@@ -1215,7 +1215,7 @@ class BundleModel(object):
         """
         clause = self.make_kwargs_clause(cl_group, kwargs)
         with open("/opt/a.txt", "w") as f:
-            f.write("QUERY: OTHER")
+            f.write("QUERY: %s" % str(cl_group.select().where(clause)))
         with self.engine.begin() as connection:
             rows = connection.execute(
               cl_group.select().where(clause)
