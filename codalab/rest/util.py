@@ -192,6 +192,7 @@ def get_group_info(group_spec, need_admin, access_all_groups=False):
     with open("/opt/c.txt", "w") as f:
         f.write('user_id: %r, is_root: %s, group_info: %s.' % (user_id, is_root_user, group_info))
 
+    return group_info
 
     # If not root and need admin access, but don't have it, raise error.
     if not is_root_user and need_admin and not group_info['is_admin'] and user_id != group_info['owner_id']:
