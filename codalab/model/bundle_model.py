@@ -1263,10 +1263,13 @@ class BundleModel(object):
                 q2 = select(fetch_cols2).where(cl_group.c.uuid == cl_user_group.c.group_uuid)
             q2 = q2.where(user_group_clause)
 
+        with open("/opt/a.txt", "w") as f:
+            f.write("QUERY: %s\n" % str(q0))
+            f.write("QUERY: %s\n" % str(q1))
+            f.write("QUERY: %s\n" % str(q2))
+
         # Union
         q0 = union(*filter(lambda q : q is not None, [q0, q1, q2]))
-        with open("/opt/a.txt", "w") as f:
-            f.write("QUERY: " + str(q0))
 
         with self.engine.begin() as connection:
             rows = connection.execute(q0).fetchall()
