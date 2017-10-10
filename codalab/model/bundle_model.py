@@ -1273,6 +1273,8 @@ class BundleModel(object):
 
         with self.engine.begin() as connection:
             rows = connection.execute(q0).fetchall()
+            with open("/opt/b.txt", "w") as f:
+                f.write("ROWS: %s\n" % str(rows))
             if not rows:
                 return []
             for i, row in enumerate(rows):
