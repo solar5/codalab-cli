@@ -37,7 +37,7 @@ def unique_group(model, group_spec, user_id):
         return model.batch_get_all_groups(
             spec_filters,
             {'owner_id': user_id, 'user_defined': True},
-            {'user_id': user_id, 'is_admin': True})
+            {'user_id': user_id})
     if user_id == None:
         search = search_all
     else:
