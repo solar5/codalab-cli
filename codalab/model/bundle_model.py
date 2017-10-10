@@ -1269,7 +1269,8 @@ class BundleModel(object):
             f.write("QUERY: %s\n" % str(q2))
 
         # Union
-        q0 = union(*filter(lambda q : q is not None, [q0, q1, q2]))
+        #q0 = union(*filter(lambda q : q is not None, [q0, q1, q2]))
+        q0 = q2
 
         with self.engine.begin() as connection:
             rows = connection.execute(q0).fetchall()
