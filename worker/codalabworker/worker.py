@@ -19,6 +19,7 @@ VERSION = 12
 
 logger = logging.getLogger(__name__)
 
+
 class Worker(object):
     """
     This class is responsible for:
@@ -70,7 +71,7 @@ class Worker(object):
             try:
                 self._checkin()
                 if not self._last_checkin_successful:
-                    logger.info('Connected! Successful check in.')
+                    print('Connected! Successful check in.')
                 self._last_checkin_successful = True
 
             except Exception:
@@ -89,7 +90,8 @@ class Worker(object):
             self._upgrade()
 
     def signal(self):
-        logger.info('Exiting: Will wait for exiting jobs to finish, but will not start any new jobs.')
+        print('Exiting: Will wait for exiting jobs to finish, but will not '
+              'start any new jobs.')
         with self._exiting_lock:
             self._exiting = True
 
