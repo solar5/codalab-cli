@@ -217,8 +217,7 @@ class Run(object):
                 self._safe_update_run_status('Starting Docker container')
                 return self._docker.start_container(
                     self._bundle_path, self._uuid, self._bundle['command'],
-                    self._resources['docker_image'],
-                    self._resources['request_network'],
+                    self._resources['docker_image'], self._worker._docker_network_name,
                     dependencies)
 
             # Pull the docker image regardless of whether or not we already have it

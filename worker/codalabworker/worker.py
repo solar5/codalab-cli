@@ -47,12 +47,13 @@ class Worker(object):
 
     def __init__(self, id, tag, work_dir, max_work_dir_size_bytes,
                  max_images_bytes, shared_file_system,
-                 slots, bundle_service, docker):
+                 slots, bundle_service, docker, docker_network_name=None):
         self.id = id
         self._tag = tag
         self.shared_file_system = shared_file_system
         self._bundle_service = bundle_service
         self._docker = docker
+        self._docker_network_name = docker_network_name
         self._slots = slots
 
         self._worker_state_manager = WorkerStateManager(work_dir, self.shared_file_system)
