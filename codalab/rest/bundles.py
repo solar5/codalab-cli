@@ -393,7 +393,7 @@ def _netcat_bundle(uuid, port):
     bundle = local.model.get_bundle(uuid)
     if bundle.state in State.FINAL_STATES:
         abort(httplib.FORBIDDEN, 'Cannot netcat bundle, bundle already finalized.')
-    info = local.download_manager.netcat(uuid, port, request.json['data']['message'])
+    info = local.download_manager.netcat(uuid, port, request.json['message'])
     return {
         'data': info
     }
