@@ -337,15 +337,16 @@ class Run(object):
             self._bundle_service.reply(self._worker.id, socket_id, message)
 
         try:
+            logging.debug('read_args Received: {}'.format(read_args))
             message = read_args['message']
-            container_ip = self._worker._docker.get_container_ip(self._container_id)
+            container_ip = self._worker._docker.get_container_ip(self.network_name, self._container_id)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             logging.debug("netcat: {} {} --- {}".format(container_ip, port, message))
             s.connect((container_ip, port))
             s.sendall(message)
             data = s.recv(1024)
             s.close()
-            print('NETCAT Received:', repr(data))
+            logging.debug('NETCAT Received: {}'.format(repr(data)))
             string = data
             self._bundle_service.reply_data(self._worker.id, socket_id, {}, string)
         except BundleServiceException:
