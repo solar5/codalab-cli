@@ -338,7 +338,7 @@ class Run(object):
 
         try:
             message = read_args['message']
-            container_ip = self._worker._docker.get_container_ip(container_id)
+            container_ip = self._worker._docker.get_container_ip(self._container_id)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
             s.connect((container_ip, port))
