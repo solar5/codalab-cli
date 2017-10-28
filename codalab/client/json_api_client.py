@@ -435,7 +435,7 @@ class JsonApiClient(RestClient):
         :return: the created object(s)
         """
         request_path = '/bundles/%s/netcat/%s/' % (bundle_id, port)
-        return self._make_request('PUT', request_path, data=data, return_response=True)
+        return self._make_request('PUT', request_path, data=data)
 
     @wrap_exception('Unable to create {1}')
     def create(self, resource_type, data, params=None):
