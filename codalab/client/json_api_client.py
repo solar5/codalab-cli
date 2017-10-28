@@ -423,6 +423,20 @@ class JsonApiClient(RestClient):
         else:
             return results[0]
 
+    @wrap_exception('Unable to netcat {1}')
+    def netcat(self, resource_type, resource_id, port, data):
+        """
+        Request to create a resource or resources.
+        Always uses bulk update.
+
+        :param resource_type: resource type as string
+        :param data: info dict or list of info dicts
+        :param params: dict of query parameters
+        :return: the created object(s)
+        """
+        request_path = '/bundles/%s/netcat/%s' % (bundle_id, port)
+        return self._make_request('PUT', request_path, data=data, return_response=True)
+
     @wrap_exception('Unable to create {1}')
     def create(self, resource_type, data, params=None):
         """
