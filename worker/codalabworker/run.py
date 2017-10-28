@@ -339,7 +339,7 @@ class Run(object):
         try:
             logging.debug('read_args Received: {}'.format(read_args))
             message = read_args['message']
-            container_ip = self._worker._docker.get_container_ip(self.network_name, self._container_id)
+            container_ip = self._worker._docker.get_container_ip(self._worker._docker_network_name, self._container_id)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             logging.debug("netcat: {} {} --- {}".format(container_ip, port, message))
             s.connect((container_ip, port))
