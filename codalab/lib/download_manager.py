@@ -213,11 +213,11 @@ class DownloadManager(object):
                 'message': message,
             }
             self._send_netcat_message(worker, response_socket_id, uuid, port, read_args)
-            reply_data = self._get_read_response_stream(response_socket_id)
-            return reply_data
-        except:
+            string = self._get_read_response_string(response_socket_id)
+        finally:
             self._worker_model.deallocate_socket(response_socket_id)
-            raise
+
+            return string
 
     def _is_available_locally(self, uuid):
         if self._bundle_model.get_bundle_state(uuid) == State.RUNNING:
