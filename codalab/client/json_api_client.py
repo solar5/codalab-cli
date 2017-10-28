@@ -424,7 +424,7 @@ class JsonApiClient(RestClient):
             return results[0]
 
     @wrap_exception('Unable to netcat {1}')
-    def netcat(self, resource_type, resource_id, port, data):
+    def netcat(self, bundle_id, port, data):
         """
         Request to create a resource or resources.
         Always uses bulk update.
