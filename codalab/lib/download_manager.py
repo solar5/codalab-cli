@@ -214,7 +214,7 @@ class DownloadManager(object):
             }
             self._send_netcat_message(worker, response_socket_id, uuid, port, read_args)
             reply_data = self._get_read_response_stream(response_socket_id)
-            return Deallocating(reply_data, self._worker_model, response_socket_id)
+            return reply_data
         except:
             self._worker_model.deallocate_socket(response_socket_id)
             raise
