@@ -387,6 +387,18 @@ def _fetch_bundle_contents_info(uuid, path=''):
     }
 
 
+@put('/bundles/<uuid:re:%s>/netcat/<port:port>/' % spec_util.UUID_STR, name='netcat_bundle')
+def _netcat_bundle(uuid, port):
+    check_bundles_have_all_permission(local.model, request.user, [uuid])
+    bundle = local.model.get_bundle(uuid)
+    if bundle.state in State.FINAL_STATES:
+        abort(httplib.FORBIDDEN, 'Cannot netcat bundle, bundle already finalized.')
+    info = local.download_manager.netcat(uuid, port, request.json['data']['message'])
+    return {
+        'data': info
+    }
+
+
 @get('/bundles/<uuid:re:%s>/contents/blob/' % spec_util.UUID_STR, name='fetch_bundle_contents_blob')
 @get('/bundles/<uuid:re:%s>/contents/blob/<path:path>' % spec_util.UUID_STR, name='fetch_bundle_contents_blob')
 def _fetch_bundle_contents_blob(uuid, path=''):

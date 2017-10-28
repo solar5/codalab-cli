@@ -328,6 +328,32 @@ class Run(object):
         }
         bundle_service.reply(worker.id, socket_id, message)
 
+    def netcat(self, socket_id, port, read_args):
+        def reply_error(code, message):
+            message = {
+                'error_code': code,
+                'error_message': message,
+            }
+            self._bundle_service.reply(self._worker.id, socket_id, message)
+
+        try:
+            message = read_args['message']
+            container_ip = self._worker._docker.get_container_ip(container_id)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            s.connect((container_ip, port))
+            s.sendall(message)
+            data = s.recv(1024)
+            s.close()
+            print('NETCAT Received:', repr(data))
+            string = data
+            self._bundle_service.reply_data(self._worker.id, socket_id, {}, string)
+        except BundleServiceException:
+            traceback.print_exc()
+        except Exception as e:
+            traceback.print_exc()
+            reply_error(httplib.INTERNAL_SERVER_ERROR, e.message)
+
     def read(self, socket_id, path, read_args):
         def reply_error(code, message):
             message = {
