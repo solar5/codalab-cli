@@ -217,7 +217,8 @@ class DownloadManager(object):
         finally:
             self._worker_model.deallocate_socket(response_socket_id)
 
-            return string
+        logging.debug("netcat==: {}".format(string))
+        return string
 
     def _is_available_locally(self, uuid):
         if self._bundle_model.get_bundle_state(uuid) == State.RUNNING:
