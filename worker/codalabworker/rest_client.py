@@ -60,7 +60,6 @@ class RestClient(object):
         request_url = (self._base_url + path).encode('utf-8')
 
         request = urllib2.Request(request_url, data=data, headers=headers)
-        logging.debug("REQUEST: {}".format(request))
         request.get_method = lambda: method
         if return_response:
             # Return a file-like object containing the contents of the response
