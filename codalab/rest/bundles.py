@@ -393,7 +393,6 @@ def _fetch_bundle_contents_info(uuid, path=''):
 @delete('/bundles/<uuid:re:%s>/netcat/<port:int>/' % spec_util.UUID_STR, name='netcat_bundle')
 def _netcat_bundle(uuid, port):
     check_bundles_have_all_permission(local.model, request.user, [uuid])
-    abort(httplib.NOT_FOUND, repr(request.environ))
     bundle = local.model.get_bundle(uuid)
     if bundle.state in State.FINAL_STATES:
         abort(httplib.FORBIDDEN, 'Cannot netcat bundle, bundle already finalized.')
