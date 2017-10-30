@@ -397,15 +397,14 @@ def _netcat_bundle(uuid, port, path=''):
     bundle = local.model.get_bundle(uuid)
     if bundle.state in State.FINAL_STATES:
         abort(httplib.FORBIDDEN, 'Cannot netcat bundle, bundle already finalized.')
-    info = local.download_manager.netcat(
-            uuid,
-            port,
-            json.dumps(
-                request.environ,
-                skipkeys=True,
-                default=lambda x: {k: v for k, v in x.iteritems()}
-            )
-    )
+
+    def interpret_as_dict(x):
+        try:
+            return {k: v for k, v in x.iteritems()}
+        except:
+            return None
+
+    info = local.download_manager.netcat(uuid, port, json.dumps(request.environ, skipkeys=True, interpret_as_dict))
     return {
         'data': info
     }
