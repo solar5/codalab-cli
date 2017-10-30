@@ -7,7 +7,7 @@ import time
 import json
 from itertools import izip
 
-from bottle import abort, get, post, put, delete, local, request, response
+from bottle import abort, route, get, post, put, delete, local, request, response
 
 from codalab.bundles import (
     get_bundle_subclass,
@@ -388,10 +388,7 @@ def _fetch_bundle_contents_info(uuid, path=''):
     }
 
 
-@put('/bundles/<uuid:re:%s>/netcat/<port:int>/<path:path>' % spec_util.UUID_STR, name='netcat_bundle')
-@get('/bundles/<uuid:re:%s>/netcat/<port:int>/<path:path>' % spec_util.UUID_STR, name='netcat_bundle')
-@post('/bundles/<uuid:re:%s>/netcat/<port:int>/<path:path>' % spec_util.UUID_STR, name='netcat_bundle')
-@delete('/bundles/<uuid:re:%s>/netcat/<port:int>/<path:path>' % spec_util.UUID_STR, name='netcat_bundle')
+@route('/bundles/<uuid:re:%s>/netcat/<port:int>/<path:re:.*>' % spec_util.UUID_STR, name='netcat_bundle')
 def _netcat_bundle(uuid, port, path=''):
     check_bundles_have_all_permission(local.model, request.user, [uuid])
     bundle = local.model.get_bundle(uuid)
@@ -404,7 +401,13 @@ def _netcat_bundle(uuid, port, path=''):
         except:
             return None
 
-    info = local.download_manager.netcat(uuid, port, json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
+    try:
+        request.path_shift(4)
+        info = local.download_manager.netcat(uuid, port,
+                json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
+    finally:
+        request.path_shift(-4)
+
     return {
         'data': info
     }

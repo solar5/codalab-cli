@@ -248,13 +248,13 @@ class DownloadManager(object):
         if not self._worker_model.send_json_message(worker['socket_id'], message, 60): # dead workers are a fact of life now
             logging.info('Unable to reach worker')
 
-    def _send_netcat_message(self, worker, response_socket_id, uuid, port, read_args):
+    def _send_netcat_message(self, worker, response_socket_id, uuid, port, request_environ):
         message = {
             'type': 'netcat',
             'socket_id': response_socket_id,
             'uuid': uuid,
             'port': port,
-            'read_args': read_args, # consist of a message only
+            'environ': request_environ,
         }
         if not self._worker_model.send_json_message(worker['socket_id'], message, 60): # dead workers are a fact of life now
             logging.info('Unable to reach worker')
