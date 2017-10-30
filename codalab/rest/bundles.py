@@ -404,7 +404,7 @@ def _netcat_bundle(uuid, port, path=''):
         except:
             return None
 
-    info = local.download_manager.netcat(uuid, port, json.dumps(request.environ, skipkeys=True, interpret_as_dict))
+    info = local.download_manager.netcat(uuid, port, json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
     return {
         'data': info
     }
