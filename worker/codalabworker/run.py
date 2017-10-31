@@ -357,8 +357,9 @@ class Run(object):
 
             body = proxy_app(json.loads(environ), start_response)
             rs.body = itertools.chain(rs.body, body) if rs.body else body
-            string = rs.body
+            string = "".join(rs.body)
             logging.debug('NETCAT Received: {}'.format(repr(rs)))
+            logging.debug('rs.body Received: {}'.format(string))
             self._bundle_service.reply_data(self._worker.id, socket_id, {}, string)
         except BundleServiceException:
             traceback.print_exc()
