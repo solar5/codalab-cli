@@ -331,7 +331,7 @@ class Run(object):
         }
         bundle_service.reply(worker.id, socket_id, message)
 
-    def netcat(self, socket_id, port, read_args):
+    def netcat(self, socket_id, port, environ):
         def reply_error(code, message):
             message = {
                 'error_code': code,
@@ -340,8 +340,7 @@ class Run(object):
             self._bundle_service.reply(self._worker.id, socket_id, message)
 
         try:
-            logging.debug('environ Received: {}'.format(read_args))
-            environ = read_args['environ']
+            logging.debug('environ Received: {}'.format(environ))
             container_ip = self._worker._docker.get_container_ip(self._worker._docker_network_name, self._container_id)
             logging.debug("netcat: {} {} --- {}".format(container_ip, port, environ))
 
@@ -355,7 +354,7 @@ class Run(object):
                     rs.add_header(name, value)
                 return rs.body.append
 
-            body = proxy_app(json.loads(read_args['environ']), start_response)
+            body = proxy_app(json.loads(environ), start_response)
             rs.body = itertools.chain(rs.body, body) if rs.body else body
             string = rs.body
             logging.debug('NETCAT Received: {}'.format(repr(rs)))

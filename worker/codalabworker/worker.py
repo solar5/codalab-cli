@@ -157,7 +157,7 @@ class Worker(object):
                            response['read_args'])
             elif type == 'netcat':
                 self._netcat(response['socket_id'], response['uuid'], response['port'],
-                           response['read_args'])
+                           response['environ'])
             elif type == 'write':
                 self._write(response['uuid'], response['subpath'],
                             response['string'])
