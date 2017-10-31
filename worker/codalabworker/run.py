@@ -374,7 +374,9 @@ class Run(object):
                     rs.add_header(name, value)
                 return rs.body.append
 
-            body = proxy_app(json.loads(environ), wrap_start_response(start_response))
+            environ_new = json.loads(environ)
+            del environ_new['HTTP_HOST']
+            body = proxy_app(environ_new, wrap_start_response(start_response))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
             string = "".join(rs.body)
             logging.debug('NETCAT Received: {}'.format(repr(rs)))
