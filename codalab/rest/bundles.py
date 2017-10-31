@@ -415,7 +415,7 @@ def _netcat_bundle(uuid, port, path=''):
     finally:
         request.path_shift(-4)
 
-    return body
+    return rs
 
 @get('/bundles/<uuid:re:%s>/contents/blob/' % spec_util.UUID_STR, name='fetch_bundle_contents_blob')
 @get('/bundles/<uuid:re:%s>/contents/blob/<path:path>' % spec_util.UUID_STR, name='fetch_bundle_contents_blob')
