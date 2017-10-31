@@ -9,6 +9,7 @@ import json
 import traceback
 
 from bottle import HTTPResponse
+from wsgiproxy.app import WSGIProxyApp
 
 from bundle_service_client import BundleServiceException
 from docker_client import DockerException

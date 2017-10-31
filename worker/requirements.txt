@@ -1,4 +1,5 @@
 setuptools>=35.0.2
+wsgi-proxy>=0.4.0
 bottle==0.12.9
 argcomplete==1.1.0
 PyYAML==3.11
