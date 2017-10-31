@@ -381,8 +381,8 @@ class Run(object):
             body = "".join(rs.body)
             split_body = body.split("\n")
             base_url = ""
-            base_url += environ["bottle.request.urlparts"][0] + "://" + environ["bottle.request.urlparts"][1]
-            base_url += environ["bottle.request.urlparts"][2]
+            base_url += environ_new["bottle.request.urlparts"][0] + "://" + environ_new["bottle.request.urlparts"][1]
+            base_url += environ_new["bottle.request.urlparts"][2]
             for i in range(len(split_body)):
                 if "<head>" in split_body[i]:
                     split_body.insert(i + 1, "<base href=\"{}\">".format(base_url))
