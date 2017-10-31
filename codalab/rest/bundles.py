@@ -406,6 +406,7 @@ def _netcat_bundle(uuid, port, path=''):
         request.path_shift(4)
         info = local.download_manager.netcat(uuid, port,
                 json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
+        info = json.loads(info)
         rs = HTTPResponse([])
         rs._status_code = info['status_code']
         rs._status_line = info['status_line']
