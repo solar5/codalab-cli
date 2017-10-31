@@ -205,14 +205,11 @@ class DownloadManager(object):
                 string = file_util.un_gzip_string(string)
             return string
 
-    def netcat(self, uuid, port, message):
+    def netcat(self, uuid, port, environ):
         worker = self._worker_model.get_bundle_worker(uuid)
         response_socket_id = self._worker_model.allocate_socket(worker['user_id'], worker['worker_id'])
         try:
-            read_args = {
-                'message': message,
-            }
-            self._send_netcat_message(worker, response_socket_id, uuid, port, read_args)
+            self._send_netcat_message(worker, response_socket_id, uuid, port, environ)
             string = self._get_read_response_string(response_socket_id)
         finally:
             self._worker_model.deallocate_socket(response_socket_id)
