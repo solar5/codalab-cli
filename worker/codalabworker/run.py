@@ -379,10 +379,16 @@ class Run(object):
             logging.debug('new environ: {}'.format(environ_new))
             body = proxy_app(environ_new, wrap_start_response(start_response))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
-            string = "".join(rs.body)
-            logging.debug('NETCAT Received: {}'.format(repr(rs)))
-            logging.debug('rs.body Received: {}'.format(string))
-            self._bundle_service.reply_data(self._worker.id, socket_id, {}, string)
+            body = "".join(rs.body)
+            data = {
+                    'status_code': rs._status_code,
+                    'status_line': rs._status_line,
+                    'headers': rs._headers,
+                    #'cookies': rs._cookies,
+                    'body': body
+            }
+            logging.debug('rs Received: {}'.format(data))
+            self._bundle_service.reply_data(self._worker.id, socket_id, {}, json.dumps(data))
         except BundleServiceException:
             traceback.print_exc()
         except Exception as e:

@@ -7,6 +7,7 @@ import time
 import json
 from itertools import izip
 
+from bottle import HTTPResponse
 from bottle import abort, route, get, post, put, delete, local, request, response
 
 from codalab.bundles import (
@@ -405,10 +406,15 @@ def _netcat_bundle(uuid, port, path=''):
         request.path_shift(4)
         info = local.download_manager.netcat(uuid, port,
                 json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
+        rs = HTTPResponse([])
+        rs._status_code = info['status_code']
+        rs._status_line = info['status_line']
+        rs._headers = info['headers']
+        rs.body = info['body']
     finally:
         request.path_shift(-4)
 
-    return info
+    return body
 
 @get('/bundles/<uuid:re:%s>/contents/blob/' % spec_util.UUID_STR, name='fetch_bundle_contents_blob')
 @get('/bundles/<uuid:re:%s>/contents/blob/<path:path>' % spec_util.UUID_STR, name='fetch_bundle_contents_blob')
