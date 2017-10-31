@@ -347,6 +347,15 @@ class Run(object):
 
             proxy_app = WSGIProxyApp("http://{}:{}/".format(container_ip, port))
             rs = HTTPResponse([])
+
+            def wrap_start_response(start_response):
+                def wrapped_start_response(status, headers_out):
+                    # Remove "hop-by-hop" headers
+                    headers_out = [(k,v) for (k,v) in headers_out
+                                   if k not in FILTER_HEADERS]
+                    return start_response(status, headers_out)
+                return wrapped_start_response
+
             def start_response(status, headerlist, exc_info=None):
                 if exc_info:
                     _raise(*exc_info)
@@ -355,7 +364,7 @@ class Run(object):
                     rs.add_header(name, value)
                 return rs.body.append
 
-            body = proxy_app(json.loads(environ), start_response)
+            body = proxy_app(json.loads(environ), wrap_start_response(start_response))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
             string = "".join(rs.body)
             logging.debug('NETCAT Received: {}'.format(repr(rs)))
