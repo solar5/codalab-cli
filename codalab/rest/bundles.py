@@ -48,6 +48,7 @@ from codalab.rest.util import (
     resolve_owner_in_keywords,
 )
 from codalab.server.authenticated_plugin import AuthenticatedPlugin
+from codalab.server.cookie import NetCatCookie
 
 
 @get('/bundles/<uuid:re:%s>' % spec_util.UUID_STR)
@@ -401,6 +402,11 @@ def _netcat_bundle(uuid, port, path=''):
             return {k: v for k, v in x.iteritems()}
         except:
             return None
+
+
+    # Save cookie in client
+    cookie = NetCatCookie('/bundles/{}/{}/'.format(uuid, port), max_age=30 * 24 * 60 * 60)
+    cookie.save()
 
     try:
         request.path_shift(4)
