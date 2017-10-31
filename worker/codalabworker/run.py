@@ -379,6 +379,14 @@ class Run(object):
             logging.debug('new environ: {}'.format(environ_new))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
             body = "".join(rs.body)
+            split_body = body.split("\n")
+            base_url = ""
+            base_url += environ["bottle.request.urlparts"][0] + "://" + environ["bottle.request.urlparts"][1]
+            base_url += environ["bottle.request.urlparts"][2]
+            for i in range(len(split_body)):
+                if "<head>" in split_body[i]:
+                    split_body.insert(i + 1, "<base href=\"{}\">".format(base_url))
+            body = "\n".join(split_body)
             data = {
                     'status_code': rs._status_code,
                     'status_line': rs._status_line,
