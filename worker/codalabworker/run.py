@@ -375,7 +375,8 @@ class Run(object):
                 return rs.body.append
 
             environ_new = json.loads(environ)
-            del environ_new['HTTP_HOST']
+            environ_new['HTTP_HOST'] = environ_new['SERVER_NAME'] + ':' + environ_new['SERVER_PORT']
+            logging.debug('new environ: {}'.format(environ_new))
             body = proxy_app(environ_new, wrap_start_response(start_response))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
             string = "".join(rs.body)
