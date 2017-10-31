@@ -17,6 +17,16 @@ from download_util import BUNDLE_NO_LONGER_RUNNING_MESSAGE, get_target_info, get
 from file_util import get_path_size, gzip_file, gzip_string, read_file_section, summarize_file, tar_gzip_directory, remove_path
 from formatting import duration_str, size_str
 
+FILTER_HEADERS = [ #"hop-by-hop" headers
+    'Connection',
+    'Keep-Alive',
+    'Proxy-Authenticate',
+    'Proxy-Authorization',
+    'TE',
+    'Trailers',
+    'Transfer-Encoding',
+    'Upgrade',
+]
 
 logger = logging.getLogger(__name__)
 
