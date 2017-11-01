@@ -419,6 +419,7 @@ def _netcurl_bundle(uuid, port, path=''):
 
     try:
         request.path_shift(4)
+        request.environ['wsgi.input'] = request.environ['wsgi.input'].read(request.environ["CONTENT_LENGTH"])
         info = local.download_manager.netcurl(uuid, port,
                 json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
         info = json.loads(info)

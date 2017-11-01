@@ -7,6 +7,7 @@ import threading
 import time
 import json
 import traceback
+from io import BytesIO
 
 from bottle import HTTPResponse
 from wsgiproxy.app import WSGIProxyApp
@@ -401,6 +402,7 @@ class Run(object):
                 return rs.body.append
 
             environ_new = json.loads(environ)
+            environ_new["wsgi.input"] = BytesIO(environ_new["wsgi.input"])
             body = proxy_app(environ_new, wrap_start_response(start_response))
             logging.debug('new environ: {}'.format(environ_new))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
