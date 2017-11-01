@@ -29,7 +29,7 @@ class NetCatCookie(object):
         """
         self.clear()
         response.set_cookie(
-            self.KEY, self.path, secret=local.config['server']['secret_key'],
+            self.KEY, self, secret=local.config['server']['secret_key'],
             max_age=self.max_age, path=self.PATH)
 
     @classmethod
