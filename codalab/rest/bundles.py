@@ -389,13 +389,23 @@ def _fetch_bundle_contents_info(uuid, path=''):
         'data': info
     }
 
-
-@route('/bundles/<uuid:re:%s>/netcat/<port:int>/<path:re:.*>' % spec_util.UUID_STR, name='netcat_bundle')
-def _netcat_bundle(uuid, port, path=''):
-    check_bundles_have_read_permission(local.model, request.user, [uuid])
+@put('/bundles/<uuid:re:%s>/netcat/<port:int>/' % spec_util.UUID_STR, name='netcat_bundle')
+def _netcat_bundle(uuid, port):
+    check_bundles_have_all_permission(local.model, request.user, [uuid])
     bundle = local.model.get_bundle(uuid)
     if bundle.state in State.FINAL_STATES:
         abort(httplib.FORBIDDEN, 'Cannot netcat bundle, bundle already finalized.')
+    info = local.download_manager.netcat(uuid, port, request.json['message'])
+    return {
+        'data': info
+    }
+
+@route('/bundles/<uuid:re:%s>/netcurl/<port:int>/<path:re:.*>' % spec_util.UUID_STR, name='netcurl_bundle')
+def _netcurl_bundle(uuid, port, path=''):
+    check_bundles_have_read_permission(local.model, request.user, [uuid])
+    bundle = local.model.get_bundle(uuid)
+    if bundle.state in State.FINAL_STATES:
+        abort(httplib.FORBIDDEN, 'Cannot netcurl bundle, bundle already finalized.')
 
     def interpret_as_dict(x):
         try:
@@ -403,10 +413,9 @@ def _netcat_bundle(uuid, port, path=''):
         except:
             return None
 
-
     try:
         request.path_shift(4)
-        info = local.download_manager.netcat(uuid, port,
+        info = local.download_manager.netcurl(uuid, port,
                 json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
         info = json.loads(info)
         rs = HTTPResponse([])
@@ -414,7 +423,7 @@ def _netcat_bundle(uuid, port, path=''):
         rs._status_line = info['status_line']
         rs._headers = info['headers']
         rs.body = info['body']
-        rs.set_cookie('codalab_netcat', '/bundles/{}/netcat/{}/'.format(uuid, port), path='/')
+        rs.set_cookie('codalab_netcurl', '/bundles/{}/netcurl/{}/'.format(uuid, port), path='/')
     finally:
         request.path_shift(-4)
 

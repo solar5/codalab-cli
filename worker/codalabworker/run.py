@@ -342,7 +342,34 @@ class Run(object):
         }
         bundle_service.reply(worker.id, socket_id, message)
 
-    def netcat(self, socket_id, port, environ):
+    def netcat(self, socket_id, port, message):
+        def reply_error(code, message):
+            message = {
+                'error_code': code,
+                'error_message': message,
+            }
+            self._bundle_service.reply(self._worker.id, socket_id, message)
+
+        try:
+            logging.debug('message Received: {}'.format(message))
+            message = message['message']
+            container_ip = self._worker._docker.get_container_ip(self._worker._docker_network_name, self._container_id)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            logging.debug("netcat: {} {} --- {}".format(container_ip, port, message))
+            s.connect((container_ip, port))
+            s.sendall(message)
+            data = s.recv(1024)
+            s.close()
+            logging.debug('NETCAT Received: {}'.format(repr(data)))
+            string = data
+            self._bundle_service.reply_data(self._worker.id, socket_id, {}, string)
+        except BundleServiceException:
+            traceback.print_exc()
+        except Exception as e:
+            traceback.print_exc()
+            reply_error(httplib.INTERNAL_SERVER_ERROR, e.message)
+
+    def netcurl(self, socket_id, port, environ):
         def reply_error(code, message):
             message = {
                 'error_code': code,
@@ -353,7 +380,7 @@ class Run(object):
         try:
             logging.debug('environ Received: {}'.format(environ))
             container_ip = self._worker._docker.get_container_ip(self._worker._docker_network_name, self._container_id)
-            logging.debug("netcat: {} {} --- {}".format(container_ip, port, environ))
+            logging.debug("netcurl: {} {} --- {}".format(container_ip, port, environ))
 
             proxy_app = WSGIProxyApp("http://{}:{}/".format(container_ip, port))
             rs = HTTPResponse([])
@@ -379,14 +406,6 @@ class Run(object):
             logging.debug('new environ: {}'.format(environ_new))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
             body = "".join(rs.body)
-            split_body = body.split("\n")
-            base_url = ""
-            base_url += environ_new["bottle.request.urlparts"][0] + "://" + environ_new["bottle.request.urlparts"][1]
-            base_url += environ_new["bottle.request.urlparts"][2]
-            for i in range(len(split_body)):
-                if "<head>" in split_body[i]:
-                    split_body.insert(i + 1, "<base href=\"{}\">".format(base_url))
-            body = "\n".join(split_body)
             data = {
                     'status_code': rs._status_code,
                     'status_line': rs._status_line,
