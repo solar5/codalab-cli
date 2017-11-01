@@ -7,7 +7,7 @@ import threading
 import time
 import json
 import traceback
-from io import BytesIO
+from io import StringIO
 
 from bottle import HTTPResponse
 from wsgiproxy.app import WSGIProxyApp
