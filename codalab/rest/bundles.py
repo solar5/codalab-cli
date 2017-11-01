@@ -407,7 +407,7 @@ def _netcat_bundle(uuid, port, path=''):
     # Save cookie in client
     cookie = NetCatCookie('/bundles/{}/{}/'.format(uuid, port), max_age=30 * 24 * 60 * 60)
     cookie.save()
-    response.set_cookie('codalab_netcat', '/bundles/{}/{}/'.format(uuid, port))
+    response.set_cookie('codalab_netcat', '/bundles/{}/{}/'.format(uuid, port), path='/')
 
     try:
         request.path_shift(4)
@@ -419,7 +419,7 @@ def _netcat_bundle(uuid, port, path=''):
         rs._status_line = info['status_line']
         rs._headers = info['headers']
         rs.body = info['body']
-        rs.set_cookie('codalab_netcat', '/bundles/{}/{}/'.format(uuid, port))
+        rs.set_cookie('codalab_netcat', '/bundles/{}/{}/'.format(uuid, port), path='/')
     finally:
         request.path_shift(-4)
 
