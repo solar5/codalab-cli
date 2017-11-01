@@ -9,7 +9,7 @@ import json
 import traceback
 from io import StringIO
 
-from bottle import HTTPResponse
+from bottle import HTTPResponse, LocalRequest
 from wsgiproxy.app import WSGIProxyApp
 
 from bundle_service_client import BundleServiceException
@@ -403,7 +403,7 @@ class Run(object):
 
             environ_new = json.loads(environ)
             environ_new["wsgi.input"] = StringIO(environ_new["wsgi.input"])
-            body = proxy_app(environ_new, wrap_start_response(start_response))
+            body = proxy_app(LocalRequest(environ_new), wrap_start_response(start_response))
             logging.debug('new environ: {}'.format(environ_new))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
             body = "".join(rs.body)
