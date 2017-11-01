@@ -419,7 +419,10 @@ def _netcurl_bundle(uuid, port, path=''):
 
     try:
         request.path_shift(4)
-        request.environ['wsgi.input'] = request.environ['wsgi.input'].read(int(request.environ["CONTENT_LENGTH"]))
+        if "CONTENT_LENGTH" in request.environ:
+            request.environ['wsgi.input'] = request.environ['wsgi.input'].read(
+                    int(request.environ["CONTENT_LENGTH"])
+            )
         info = local.download_manager.netcurl(uuid, port,
                 json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
         info = json.loads(info)
@@ -429,6 +432,9 @@ def _netcurl_bundle(uuid, port, path=''):
         rs._headers = info['headers']
         rs.body = info['body']
         rs.set_cookie('codalab_netcurl', '/bundles/{}/netcurl/{}/'.format(uuid, port), path='/')
+    except:
+        print >>sys.stderr, "{}".format(request.environ)
+        raise
     finally:
         request.path_shift(-4)
 
