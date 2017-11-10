@@ -410,7 +410,6 @@ nvidia-docker-plugin not available, no GPU support on this worker.
 
         # Set up the volumes.
         volume_bindings = ['%s:%s' % (bundle_path, docker_bundle_path)]
-        volume_bindings += ['%s:%s' % ("/var/run/docker.sock", "/var/run/docker.sock")]
         for dependency_path, docker_dependency_path in dependencies:
             volume_bindings.append('%s:%s:ro' % (
                 os.path.abspath(dependency_path),

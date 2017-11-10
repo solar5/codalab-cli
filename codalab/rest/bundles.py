@@ -48,7 +48,6 @@ from codalab.rest.util import (
     resolve_owner_in_keywords,
 )
 from codalab.server.authenticated_plugin import AuthenticatedPlugin
-from codalab.server.cookie import NetCatCookie
 
 
 @get('/bundles/<uuid:re:%s>' % spec_util.UUID_STR)
@@ -418,25 +417,30 @@ def _netcurl_bundle(uuid, port, path=''):
             return None
 
     try:
-        request.path_shift(4)
+        request.path_shift(4) # shift away the routing parts of the URL
+
+        # crappy hack to serialize the HTML body stream so we can send it to a worker
         if "CONTENT_LENGTH" in request.environ:
             request.environ['wsgi.input'] = request.environ['wsgi.input'].read(
-                    int(request.environ["CONTENT_LENGTH"])
+                    int(request.environ['CONTENT_LENGTH'])
             )
+
+        # attempt to serialize the bottle-made request environ and sends it to a worker
         info = local.download_manager.netcurl(uuid, port,
                 json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
+
+        # some crappy hacks to populate the response object; I don't even know if this covers everything
         info = json.loads(info)
         rs = HTTPResponse([])
         rs._status_code = info['status_code']
         rs._status_line = info['status_line']
         rs._headers = info['headers']
         rs.body = info['body']
-        rs.set_cookie('codalab_netcurl', '/bundles/{}/netcurl/{}/'.format(uuid, port), path='/')
     except:
         print >>sys.stderr, "{}".format(request.environ)
         raise
     finally:
-        request.path_shift(-4)
+        request.path_shift(-4) # restore the URL
 
     return rs
 

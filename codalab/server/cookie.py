@@ -11,46 +11,6 @@ from bottle import (
 
 from codalab.server.authenticated_plugin import user_is_authenticated
 
-class NetCatCookie(object):
-    """
-    Represents the user's session cookie after logging in.
-    """
-    KEY = "codalab_netcat"
-    PATH = "/"
-
-    def __init__(self, path, max_age):
-        self.max_age = max_age
-        self.path = path
-        self.expires = datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age)
-
-    def save(self):
-        """
-        Save cookie on the Bottle response object.
-        """
-        self.clear()
-        response.set_cookie(
-            self.KEY, self, secret=local.config['server']['secret_key'],
-            max_age=self.max_age, path=self.PATH)
-
-    @classmethod
-    def get(cls):
-        """
-        Get cookie on the Bottle request object.
-        Will only return cookie if exists and not expired yet.
-
-        :return: LoginCookie or None
-        """
-        path = request.get_cookie(
-            cls.KEY, secret=local.config['server']['secret_key'], default=None)
-        return path
-
-    @classmethod
-    def clear(cls):
-        """
-        Delete cookie on the Bottle response object.
-        """
-        response.delete_cookie(cls.KEY, path=cls.PATH)
-
 class LoginCookie(object):
     """
     Represents the user's session cookie after logging in.
