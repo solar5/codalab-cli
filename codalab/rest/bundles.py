@@ -390,6 +390,10 @@ def _fetch_bundle_contents_info(uuid, path=''):
 
 @put('/bundles/<uuid:re:%s>/netcat/<port:int>/' % spec_util.UUID_STR, name='netcat_bundle')
 def _netcat_bundle(uuid, port):
+    """
+    Send a raw bytestring into the specified port of the running bundle with uuid.
+    Return the response from this bundle.
+    """
     check_bundles_have_read_permission(local.model, request.user, [uuid])
     bundle = local.model.get_bundle(uuid)
     if bundle.state in State.FINAL_STATES:
@@ -405,6 +409,10 @@ def _netcat_bundle(uuid, port):
 @get('/bundles/<uuid:re:%s>/netcurl/<port:int>/<path:re:.*>' % spec_util.UUID_STR, name='netcurl_bundle')
 @patch('/bundles/<uuid:re:%s>/netcurl/<port:int>/<path:re:.*>' % spec_util.UUID_STR, name='netcurl_bundle')
 def _netcurl_bundle(uuid, port, path=''):
+    """
+    Forward an HTTP request into the specified port of the running bundle with uuid.
+    Return the HTTP response from this bundle.
+    """
     check_bundles_have_read_permission(local.model, request.user, [uuid])
     bundle = local.model.get_bundle(uuid)
     if bundle.state in State.FINAL_STATES:

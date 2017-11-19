@@ -1795,7 +1795,7 @@ class BundleCLI(object):
     @Commands.command(
         'netcat',
         help=[
-            'Beta feature: this command may change in a future release. Mount the contents of a bundle at a read-only mountpoint.',
+            'Beta feature: this command may change in a future release. Send raw data to a port of a running bundle',
         ],
         arguments=(
             Commands.Argument('bundle_spec', help=BUNDLE_SPEC_FORMAT, completer=BundlesCompleter),

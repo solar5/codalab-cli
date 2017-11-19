@@ -206,6 +206,10 @@ class DownloadManager(object):
             return string
 
     def netcurl(self, uuid, port, environ):
+        """
+        Sends an HTTP request defined by the environ into the specified port of a running bundle,
+        then return the response.
+        """
         worker = self._worker_model.get_bundle_worker(uuid)
         response_socket_id = self._worker_model.allocate_socket(worker['user_id'], worker['worker_id'])
         try:
@@ -214,10 +218,12 @@ class DownloadManager(object):
         finally:
             self._worker_model.deallocate_socket(response_socket_id)
 
-        logging.debug("netcurl==: {}".format(string))
         return string
 
     def netcat(self, uuid, port, message):
+        """
+        Sends a raw bytestring into the specified port of a running bundle, then return the response.
+        """
         worker = self._worker_model.get_bundle_worker(uuid)
         response_socket_id = self._worker_model.allocate_socket(worker['user_id'], worker['worker_id'])
         try:
@@ -226,7 +232,6 @@ class DownloadManager(object):
         finally:
             self._worker_model.deallocate_socket(response_socket_id)
 
-        logging.debug("netcat==: {}".format(string))
         return string
 
     def _is_available_locally(self, uuid):

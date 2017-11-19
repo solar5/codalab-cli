@@ -344,6 +344,8 @@ class Run(object):
         bundle_service.reply(worker.id, socket_id, message)
 
     def netcat(self, socket_id, port, message):
+        """ Set up a unix socket to the running container, send the message and retrieve the response. """
+
         def reply_error(code, message):
             message = {
                 'error_code': code,
@@ -352,17 +354,13 @@ class Run(object):
             self._bundle_service.reply(self._worker.id, socket_id, message)
 
         try:
-            logging.debug('message Received: {}'.format(message))
             container_ip = self._worker._docker.get_container_ip(self._worker._docker_network_name, self._container_id)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            logging.debug("netcat: {} {} --- {}".format(container_ip, port, message))
             s.connect((container_ip, port))
             s.sendall(message)
-            data = s.recv(1024)
+            data = s.recv(1024) # TODO: loop to receive larger data
             s.close()
-            logging.debug('NETCAT Received: {}'.format(repr(data)))
-            string = data
-            self._bundle_service.reply_data(self._worker.id, socket_id, {}, string)
+            self._bundle_service.reply_data(self._worker.id, socket_id, {}, data)
         except BundleServiceException:
             traceback.print_exc()
         except Exception as e:
@@ -370,6 +368,15 @@ class Run(object):
             reply_error(httplib.INTERNAL_SERVER_ERROR, e.message)
 
     def netcurl(self, socket_id, port, environ):
+        """
+        Set up an HTTP proxy to the running container, reconstruct the environ, send
+        it to the container and retrieve the response.
+
+        Given environ has been heavily modified to a serializable form. Some massaging
+        is performed to reconstruct the environ to its former state.
+
+        """
+
         def reply_error(code, message):
             message = {
                 'error_code': code,
@@ -378,10 +385,9 @@ class Run(object):
             self._bundle_service.reply(self._worker.id, socket_id, message)
 
         try:
-            logging.debug('environ Received: {}'.format(environ))
             container_ip = self._worker._docker.get_container_ip(self._worker._docker_network_name, self._container_id)
-            logging.debug("netcurl: {} {} --- {}".format(container_ip, port, environ))
 
+            # define the proxy
             proxy_app = WSGIProxyApp("http://{}:{}/".format(container_ip, port))
             rs = HTTPResponse([])
 
@@ -401,13 +407,15 @@ class Run(object):
                     rs.add_header(name, value)
                 return rs.body.append
 
+            # reconstruct the environ
             environ_new = json.loads(environ)
             environ_new["wsgi.input"] = StringIO(environ_new["wsgi.input"])
             if not environ_new["wsgi.input"]:
                 environ_new["wsgi.input"] = environ_new["bottle.request.body"]
             environ_new.update(environ_new["bottle.request.headers"])
+
+            # send in the response and retrieve the response
             body = proxy_app(environ_new, wrap_start_response(start_response))
-            logging.debug('new environ: {}'.format(environ_new))
             rs.body = itertools.chain(rs.body, body) if rs.body else body
             body = "".join(rs.body)
             data = {
@@ -417,7 +425,6 @@ class Run(object):
                     #'cookies': rs._cookies,
                     'body': body
             }
-            logging.debug('rs Received: {}'.format(data))
             self._bundle_service.reply_data(self._worker.id, socket_id, {}, json.dumps(data))
         except BundleServiceException:
             traceback.print_exc()

@@ -426,13 +426,12 @@ class JsonApiClient(RestClient):
     @wrap_exception('Unable to netcat {1}')
     def netcat(self, bundle_id, port, data):
         """
-        Request to create a resource or resources.
-        Always uses bulk update.
+        Request to send data to a running bundle
 
-        :param resource_type: resource type as string
-        :param data: info dict or list of info dicts
-        :param params: dict of query parameters
-        :return: the created object(s)
+        :param bundle_id: running bundle uuid
+        :param data: bytestring
+        :param port: service port running on bundle
+        :return: the response
         """
         request_path = '/bundles/%s/netcat/%s/' % (bundle_id, port)
         return self._make_request('PUT', request_path, data=data)
@@ -440,13 +439,12 @@ class JsonApiClient(RestClient):
     @wrap_exception('Unable to netcurl {1}')
     def netcurl(self, bundle_id, port, data):
         """
-        Request to create a resource or resources.
-        Always uses bulk update.
+        Request to send an HTTP request to a running bundle
 
-        :param resource_type: resource type as string
-        :param data: info dict or list of info dicts
-        :param params: dict of query parameters
-        :return: the created object(s)
+        :param bundle_id: running bundle uuid
+        :param data: the HTTP request
+        :param port: service port running on bundle
+        :return: the response
         """
         request_path = '/bundles/%s/netcurl/%s/' % (bundle_id, port)
         return self._make_request('PUT', request_path, data=data)
