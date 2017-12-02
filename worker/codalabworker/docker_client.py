@@ -213,6 +213,25 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                 raise DockerException(create_image_response.read())
             return json.loads(create_image_response.read())
 
+    @wrap_exception('Unable to fetch Docker network list')
+    def list_networks(self):
+        with closing(self._create_connection()) as conn:
+            conn.request('GET', '/networks');
+            response = conn.getresponse()
+            if response.status != 200:
+                raise DockerException(response.read())
+            return [t["Name"] for t in json.loads(response.read())]
+
+    @wrap_exception('Unable to create Docker network')
+    def create_network(self, network_name):
+        logger.debug('Creating Docker network: %s', network_name)
+        with closing(self._create_connection()) as conn:
+            conn.request('POST', '/networks/create');
+            response = conn.getresponse()
+            if response.status != 200:
+                raise DockerException(response.read())
+            return json.loads(response.read())["Id"]
+
     @wrap_exception('Unable to fetch Docker container ip')
     def get_container_ip(self, network_name, container_id):
         logger.debug('Fetching Docker container ip for %s', container_id)
@@ -451,8 +470,8 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         # TODO: Allocate the requested number of GPUs and isolate
         if self._use_nvidia_docker:
             self._add_nvidia_docker_arguments(create_request)
-        if network_name:
-            create_request['HostConfig']['NetworkMode'] = network_name
+
+        create_request['HostConfig']['NetworkMode'] = network_name
 
         with closing(self._create_connection()) as create_conn:
             create_conn.request('POST', '/containers/create',

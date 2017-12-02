@@ -70,6 +70,10 @@ class Worker(object):
         self._should_upgrade = False
         self._last_checkin_successful = False
 
+        # set up docker network for running bundles
+        if self._docker_network_name and self._docker_network_name not in self._docker.list_networks():
+            self._docker.create_network(self._docker_network_name)
+
     def run(self):
         if self._max_images_bytes is not None:
             self._image_manager.start_cleanup_thread()
