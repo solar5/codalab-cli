@@ -234,7 +234,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                     json.dumps(create_request), {'Content-Type': 'application/json'}
             );
             response = conn.getresponse()
-            if response.status != 200:
+            if response.status != 201:
                 raise DockerException(response.read())
             return json.loads(response.read())["Id"]
 
