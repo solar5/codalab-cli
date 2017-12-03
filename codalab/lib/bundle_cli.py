@@ -1795,7 +1795,7 @@ class BundleCLI(object):
     @Commands.command(
         'netcat',
         help=[
-            'Beta feature: this command may change in a future release. Send raw data to a port of a running bundle',
+            'Beta feature: this command may change in a future release. Send raw data into a port of a running bundle',
         ],
         arguments=(
             Commands.Argument('bundle_spec', help=BUNDLE_SPEC_FORMAT, completer=BundlesCompleter),
