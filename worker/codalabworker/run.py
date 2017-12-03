@@ -9,25 +9,11 @@ import json
 import traceback
 from io import StringIO
 
-from bottle import HTTPResponse, LocalRequest
-from wsgiproxy.app import WSGIProxyApp
-
 from bundle_service_client import BundleServiceException
 from docker_client import DockerException
 from download_util import BUNDLE_NO_LONGER_RUNNING_MESSAGE, get_target_info, get_target_path, PathException
 from file_util import get_path_size, gzip_file, gzip_string, read_file_section, summarize_file, tar_gzip_directory, remove_path
 from formatting import duration_str, size_str
-
-FILTER_HEADERS = [ #"hop-by-hop" headers
-    'Connection',
-    'Keep-Alive',
-    'Proxy-Authenticate',
-    'Proxy-Authorization',
-    'TE',
-    'Trailers',
-    'Transfer-Encoding',
-    'Upgrade',
-]
 
 logger = logging.getLogger(__name__)
 
@@ -361,71 +347,6 @@ class Run(object):
             data = s.recv(1024) # TODO: loop to receive larger data
             s.close()
             self._bundle_service.reply_data(self._worker.id, socket_id, {}, data)
-        except BundleServiceException:
-            traceback.print_exc()
-        except Exception as e:
-            traceback.print_exc()
-            reply_error(httplib.INTERNAL_SERVER_ERROR, e.message)
-
-    def netcurl(self, socket_id, port, environ):
-        """
-        Set up an HTTP proxy to the running container, reconstruct the environ, send
-        it to the container and retrieve the response.
-
-        Given environ has been heavily modified to a serializable form. Some massaging
-        is performed to reconstruct the environ to its former state.
-
-        """
-
-        def reply_error(code, message):
-            message = {
-                'error_code': code,
-                'error_message': message,
-            }
-            self._bundle_service.reply(self._worker.id, socket_id, message)
-
-        try:
-            container_ip = self._worker._docker.get_container_ip(self._worker._docker_network_name, self._container_id)
-
-            # define the proxy
-            proxy_app = WSGIProxyApp("http://{}:{}/".format(container_ip, port))
-            rs = HTTPResponse([])
-
-            def wrap_start_response(start_response):
-                def wrapped_start_response(status, headers_out):
-                    # Remove "hop-by-hop" headers
-                    headers_out = [(k,v) for (k,v) in headers_out
-                                   if k not in FILTER_HEADERS]
-                    return start_response(status, headers_out)
-                return wrapped_start_response
-
-            def start_response(status, headerlist, exc_info=None):
-                if exc_info:
-                    _raise(*exc_info)
-                rs.status = status
-                for name, value in headerlist:
-                    rs.add_header(name, value)
-                return rs.body.append
-
-            # reconstruct the environ
-            environ_new = json.loads(environ)
-            environ_new["wsgi.input"] = StringIO(environ_new["wsgi.input"])
-            if not environ_new["wsgi.input"]:
-                environ_new["wsgi.input"] = environ_new["bottle.request.body"]
-            environ_new.update(environ_new["bottle.request.headers"])
-
-            # send in the response and retrieve the response
-            body = proxy_app(environ_new, wrap_start_response(start_response))
-            rs.body = itertools.chain(rs.body, body) if rs.body else body
-            body = "".join(rs.body)
-            data = {
-                    'status_code': rs._status_code,
-                    'status_line': rs._status_line,
-                    'headers': rs._headers,
-                    #'cookies': rs._cookies,
-                    'body': body
-            }
-            self._bundle_service.reply_data(self._worker.id, socket_id, {}, json.dumps(data))
         except BundleServiceException:
             traceback.print_exc()
         except Exception as e:

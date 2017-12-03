@@ -205,21 +205,6 @@ class DownloadManager(object):
                 string = file_util.un_gzip_string(string)
             return string
 
-    def netcurl(self, uuid, port, environ):
-        """
-        Sends an HTTP request defined by the environ into the specified port of a running bundle,
-        then return the response.
-        """
-        worker = self._worker_model.get_bundle_worker(uuid)
-        response_socket_id = self._worker_model.allocate_socket(worker['user_id'], worker['worker_id'])
-        try:
-            self._send_netcurl_message(worker, response_socket_id, uuid, port, environ)
-            string = self._get_read_response_string(response_socket_id)
-        finally:
-            self._worker_model.deallocate_socket(response_socket_id)
-
-        return string
-
     def netcat(self, uuid, port, message):
         """
         Sends a raw bytestring into the specified port of a running bundle, then return the response.
@@ -269,17 +254,6 @@ class DownloadManager(object):
             'uuid': uuid,
             'port': port,
             'message': message,
-        }
-        if not self._worker_model.send_json_message(worker['socket_id'], message, 60): # dead workers are a fact of life now
-            logging.info('Unable to reach worker')
-
-    def _send_netcurl_message(self, worker, response_socket_id, uuid, port, request_environ):
-        message = {
-            'type': 'netcurl',
-            'socket_id': response_socket_id,
-            'uuid': uuid,
-            'port': port,
-            'environ': request_environ,
         }
         if not self._worker_model.send_json_message(worker['socket_id'], message, 60): # dead workers are a fact of life now
             logging.info('Unable to reach worker')

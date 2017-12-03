@@ -399,9 +399,7 @@ def _netcat_bundle(uuid, port):
     if bundle.state in State.FINAL_STATES:
         abort(httplib.FORBIDDEN, 'Cannot netcat bundle, bundle already finalized.')
     info = local.download_manager.netcat(uuid, port, request.json['message'])
-    return {
-        'data': info
-    }
+    return info
 
 @post('/bundles/<uuid:re:%s>/netcurl/<port:int>/<path:re:.*>' % spec_util.UUID_STR, name='netcurl_bundle')
 @put('/bundles/<uuid:re:%s>/netcurl/<port:int>/<path:re:.*>' % spec_util.UUID_STR, name='netcurl_bundle')
@@ -418,39 +416,23 @@ def _netcurl_bundle(uuid, port, path=''):
     if bundle.state in State.FINAL_STATES:
         abort(httplib.FORBIDDEN, 'Cannot netcurl bundle, bundle already finalized.')
 
-    def interpret_as_dict(x):
-        try:
-            return {k: v for k, v in x.iteritems()}
-        except:
-            return None
-
     try:
         request.path_shift(4) # shift away the routing parts of the URL
 
-        # crappy hack to serialize the HTML body stream so we can send it to a worker
-        if "CONTENT_LENGTH" in request.environ:
-            request.environ['wsgi.input'] = request.environ['wsgi.input'].read(
-                    int(request.environ['CONTENT_LENGTH'])
-            )
+        headers_string = ['{}: {}'.format(h, request.headers.get(h)) for h in request.headers.keys()]
+        message = "{} {} HTTP/1.1\r\n".format(request.method, request.path)
+        message += "\r\n".join(headers_string) + "\r\n"
+        message += "\r\n"
+        message += request.body.read()
 
-        # attempt to serialize the bottle-made request environ and sends it to a worker
-        info = local.download_manager.netcurl(uuid, port,
-                json.dumps(request.environ, skipkeys=True, default=interpret_as_dict))
-
-        # some crappy hacks to populate the response object; I don't even know if this covers everything
-        info = json.loads(info)
-        rs = HTTPResponse([])
-        rs._status_code = info['status_code']
-        rs._status_line = info['status_line']
-        rs._headers = info['headers']
-        rs.body = info['body']
+        info = local.download_manager.netcat(uuid, port, message)
     except:
         print >>sys.stderr, "{}".format(request.environ)
         raise
     finally:
         request.path_shift(-4) # restore the URL
 
-    return rs
+    return info
 
 @get('/bundles/<uuid:re:%s>/contents/blob/' % spec_util.UUID_STR, name='fetch_bundle_contents_blob')
 @get('/bundles/<uuid:re:%s>/contents/blob/<path:path>' % spec_util.UUID_STR, name='fetch_bundle_contents_blob')

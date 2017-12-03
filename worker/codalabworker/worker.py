@@ -162,9 +162,6 @@ class Worker(object):
             elif type == 'netcat':
                 self._netcat(response['socket_id'], response['uuid'], response['port'],
                            response['message'])
-            elif type == 'netcurl':
-                self._netcurl(response['socket_id'], response['uuid'], response['port'],
-                           response['environ'])
             elif type == 'write':
                 self._write(response['uuid'], response['subpath'],
                             response['string'])
@@ -263,15 +260,6 @@ class Worker(object):
             # Reads may take a long time, so do the read in a separate thread.
             threading.Thread(target=Run.netcat,
                              args=(run, socket_id, port, message)).start()
-
-    def _netcurl(self, socket_id, uuid, port, read_args):
-        run = self._worker_state_manager._get_run(uuid)
-        if run is None:
-            Run.read_run_missing(self._bundle_service, self, socket_id)
-        else:
-            # Reads may take a long time, so do the read in a separate thread.
-            threading.Thread(target=Run.netcurl,
-                             args=(run, socket_id, port, read_args)).start()
 
     def _write(self, uuid, subpath, string):
         run = self._worker_state_manager._get_run(uuid)
