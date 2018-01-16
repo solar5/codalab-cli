@@ -108,6 +108,7 @@ class BundleManager(object):
         parent_uuids = set(
             dep.parent_uuid for bundle in bundles for dep in bundle.dependencies)
         parents = self._model.batch_get_bundles(uuid=parent_uuids)
+
         all_parent_states = {parent.uuid: parent.state for parent in parents}
         all_parent_uuids = set(all_parent_states)
 
@@ -115,6 +116,14 @@ class BundleManager(object):
         bundles_to_stage = []
         for bundle in bundles:
             parent_uuids = set(dep.parent_uuid for dep in bundle.dependencies)
+
+            try:
+                check_bundles_have_read_permission(self._model, bundle.owner_id, parent_uuids)
+            except PermissionError as e:
+                bundles_to_fail.append(
+                    (bundle, e.msg)
+                )
+                continue
 
             missing_uuids = parent_uuids - all_parent_uuids
             if missing_uuids:
