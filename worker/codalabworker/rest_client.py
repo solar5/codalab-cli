@@ -59,7 +59,7 @@ class RestClient(object):
             headers['Content-Type'] += '; charset=utf-8'
         if data and isinstance(data, unicode):
             data = data.encode('utf-8')
-        request_url = (self._base_url + path).encode('utf-8')
+            request_url = (self._base_url + path).encode('utf-8')
 
         request = urllib2.Request(request_url, data=data, headers=headers)
         request.get_method = lambda: method
@@ -93,7 +93,7 @@ class RestClient(object):
         # Start the request.
         parsed_base_url = urlparse.urlparse(self._base_url)
         path = url + '?' + urllib.urlencode(query_params)
-        logger.error("Started chunked upload with params: %s" % query_params)
+        logger.info("Started chunked upload with params: %s" % query_params)
         if parsed_base_url.scheme == 'http':
             conn = httplib.HTTPConnection(parsed_base_url.netloc)
         else:
@@ -113,7 +113,7 @@ class RestClient(object):
                 to_send = fileobj.read(16 * 1024)
                 if not to_send:
                     break
-                logger.error("Sending %s bytes, %s sent so far" % (to_send, bytes_uploaded))
+                logger.info("Sending %s bytes, %s sent so far" % (to_send, bytes_uploaded))
                 conn.send('%X\r\n%s\r\n' % (len(to_send), to_send))
                 bytes_uploaded += len(to_send)
                 if progress_callback is not None:
