@@ -9,9 +9,12 @@ import threading
 import time
 import urllib
 import urllib2
+import logging
 
 from rest_client import RestClient, RestClientException
 from file_util import tar_gzip_directory
+
+logger = logging.getLogger(__name__)
 
 
 def wrap_exception(message):
@@ -150,6 +153,7 @@ class BundleServiceClient(RestClient):
     @wrap_exception('Unable to update bundle contents in bundle service')
     def update_bundle_contents(self, worker_id, uuid, path, progress_callback):
         with closing(tar_gzip_directory(path)) as fileobj:
+            logger.info("Updating bundle contents: %s" % uuid)
             self._upload_with_chunked_encoding(
                 'PUT', '/bundles/' + uuid + '/contents/blob/',
                 query_params={'filename': 'bundle.tar.gz'}, fileobj=fileobj,

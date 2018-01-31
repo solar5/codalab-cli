@@ -2,12 +2,14 @@ from contextlib import closing
 from cStringIO import StringIO
 import httplib
 import json
+import logging
 import urllib
 import urllib2
 import urlparse
 
 from file_util import un_gzip_stream
 
+logger = logging.getLogger(__name__)
 
 class RestClientException(Exception):
     """
@@ -91,6 +93,7 @@ class RestClient(object):
         # Start the request.
         parsed_base_url = urlparse.urlparse(self._base_url)
         path = url + '?' + urllib.urlencode(query_params)
+        logger.info("Started chunked upload with params: %s" % query_params)
         if parsed_base_url.scheme == 'http':
             conn = httplib.HTTPConnection(parsed_base_url.netloc)
         else:
@@ -110,11 +113,13 @@ class RestClient(object):
                 to_send = fileobj.read(16 * 1024)
                 if not to_send:
                     break
+                logger.debug("Sending %d bytes, %d sent so far" % (to_send, bytes_uploaded))
                 conn.send('%X\r\n%s\r\n' % (len(to_send), to_send))
                 bytes_uploaded += len(to_send)
                 if progress_callback is not None:
                     progress_callback(bytes_uploaded)
             conn.send('0\r\n\r\n')
+            logger.debug("Done uploading")
 
             # Read the response.
             response = conn.getresponse()

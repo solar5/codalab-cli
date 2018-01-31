@@ -495,6 +495,7 @@ class Run(object):
         while True:
             try:
                 retries_left -= 1
+                logger.info("Retrying once more, %d retries left." % retries_left)
                 f()
                 return
             except BundleServiceException as e:
