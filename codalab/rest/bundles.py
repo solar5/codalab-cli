@@ -538,6 +538,7 @@ def _update_bundle_contents_blob(uuid):
         else:
             filename = request.query.get('filename', default='contents')
             sources = [(filename, request['wsgi.input'])]
+            logger.error("Sources for %s: %s" % (uuid, sources))
 
         local.upload_manager.upload_to_bundle_store(
             bundle, sources=sources, follow_symlinks=False,
@@ -545,6 +546,8 @@ def _update_bundle_contents_blob(uuid):
             git=query_get_bool('git', default=False),
             unpack=query_get_bool('unpack', default=True),
             simplify_archives=query_get_bool('simplify', default=True)) # See UploadManager for full explanation of 'simplify'
+
+        logger.error("Upload to %s, uploader done." % uuid)
 
         local.upload_manager.update_metadata_and_save(bundle, new_bundle=False)
 
