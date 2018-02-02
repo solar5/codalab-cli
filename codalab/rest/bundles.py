@@ -47,7 +47,6 @@ from codalab.rest.util import (
 )
 from codalab.server.authenticated_plugin import AuthenticatedPlugin
 
-
 @get('/bundles/<uuid:re:%s>' % spec_util.UUID_STR)
 def _fetch_bundle(uuid):
     """
@@ -538,7 +537,7 @@ def _update_bundle_contents_blob(uuid):
         else:
             filename = request.query.get('filename', default='contents')
             sources = [(filename, request['wsgi.input'])]
-            logger.error("Sources for %s: %s" % (uuid, sources))
+            print >> sys.stdout, ("Sources for %s: %s" % (uuid, sources))
 
         local.upload_manager.upload_to_bundle_store(
             bundle, sources=sources, follow_symlinks=False,
@@ -547,7 +546,7 @@ def _update_bundle_contents_blob(uuid):
             unpack=query_get_bool('unpack', default=True),
             simplify_archives=query_get_bool('simplify', default=True)) # See UploadManager for full explanation of 'simplify'
 
-        logger.error("Upload to %s, uploader done." % uuid)
+        print >> sys.stdout, ("Upload to %s, uploader done." % uuid)
 
         local.upload_manager.update_metadata_and_save(bundle, new_bundle=False)
 
