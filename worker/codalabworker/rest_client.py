@@ -59,7 +59,7 @@ class RestClient(object):
             headers['Content-Type'] += '; charset=utf-8'
         if data and isinstance(data, unicode):
             data = data.encode('utf-8')
-            request_url = (self._base_url + path).encode('utf-8')
+        request_url = (self._base_url + path).encode('utf-8')
 
         request = urllib2.Request(request_url, data=data, headers=headers)
         request.get_method = lambda: method
