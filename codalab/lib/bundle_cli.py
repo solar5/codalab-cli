@@ -61,6 +61,7 @@ from codalab.lib.cli_util import (
     nested_dict_get,
     parse_target_spec,
     desugar_command
+    ReadableDateTimeDelta,
 )
 from codalab.objects.permission import (
     group_permissions_str,
@@ -159,6 +160,7 @@ USER_COMMANDS = (
 
 SERVER_COMMANDS = (
     'server',
+    'worker',
     'bundle-manager',
     'bs-add-partition',
     'bs-rm-partition',
@@ -897,6 +899,36 @@ class BundleCLI(object):
             self.manager.save_config()
         else:  # Print out value
             print config[key]
+
+    @Commands.command(
+        'worker',
+        help=[
+            'Display worker information of this CodaLab instance. Root user only.',
+        ],
+        arguments=(
+        ),
+    )
+    def do_worker_command(self, args):
+        client = self.manager.current_client()
+        raw_worker_info = client.get_worker_info()
+
+        columns = ['worker_id', 'checkin_time1', 'checkin_time', 'cpus', 'gpus', 'memory_bytes', 'tag']
+
+        data = []
+        for worker in raw_worker_info:
+            data.append({
+                'worker_id': worker['worker_id'],
+                'checkin_time1': ReadableDateTimeDelta(datetime.datetime.utcfromtimestamp(worker['checkin_time'])).format(),
+                'checkin_time2': ReadableDateTimeDelta(datetime.datetime.fromtimestamp(worker['checkin_time'])).format(),
+                'checkin_time': worker['checkin_time'],
+                'cpus': worker['cpus'],
+                'gpus': worker['gpus'],
+                'memory_bytes': worker['memory_bytes'],
+                'tag': worker['tag'],
+            })
+
+        print >>self.stdout, 'Worker Info:'
+        self.print_table(columns, data)
 
     @Commands.command(
         'upload',

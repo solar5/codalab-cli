@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import time
+from datetime import datetime
 
 from bottle import abort, get, local, post, put, request, response
 
@@ -189,6 +190,19 @@ def finalize_bundle(worker_id, uuid):
     local.model.finalize_bundle(bundle, request.user.user_id,
                                 request.json['exitcode'],
                                 request.json['failure_message'])
+
+@get('/workers/info', name='worker_info', apply=AuthenticatedPlugin())
+def worker_info():
+    '''
+    if request.user.user_id != local.model.root_user_id:
+        abort(httplib.UNAUTHORIZED, 'User is not root user')
+    '''
+    data = local.worker_model.get_workers()
+    for worker in data:
+        worker['checkin_time'] = int((worker['checkin_time'] - datetime.utcfromtimestamp(0)).total_seconds())
+        del worker['dependencies']
+    print 'data:', data
+    return {'data': data}
 
 
 @get('/workers/code.tar.gz', name='worker_download_code')
