@@ -201,7 +201,11 @@ def worker_info():
     for worker in data:
         worker['checkin_time'] = int((worker['checkin_time'] - datetime.utcfromtimestamp(0)).total_seconds())
         del worker['dependencies']
-    print 'data:', data
+
+        running_bundles = local.model.batch_get_bundles(uuid=worker['run_uuids'])
+        worker['cpus_in_use'] = sum(bundle.metadata.request_cpus for bundle in running_bundles)
+        worker['gpus_in_use'] = sum(bundle.metadata.request_gpus for bundle in running_bundles)
+
     return {'data': data}
 
 
