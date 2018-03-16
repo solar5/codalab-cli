@@ -108,31 +108,3 @@ def desugar_command(orig_target_spec, command):
         command = match.group(3)
 
     return (target_spec, buf + command)
-
-class ReadableDateTimeDelta(object):
-    """
-    Format the date / time difference between the supplied date and
-    the current time using approximate measurement boundaries
-    """
-
-    def __init__(self, dt):
-        now = datetime.datetime.now()
-        delta = now - dt
-        self.year = delta.days / 365
-        self.month = delta.days / 30 - (12 * self.year)
-        if self.year > 0:
-            self.day = 0
-        else:
-            self.day = delta.days % 30
-        self.hour = delta.seconds / 3600
-        self.minute = delta.seconds / 60 - (60 * self.hour)
-
-    def format(self):
-        fmt = []
-        for period in ['year', 'month', 'day', 'hour', 'minute']:
-            value = getattr(self, period)
-            if value:
-                if value > 1:
-                    period += "s"
-                fmt.append("%s %s" % (value, period))
-        return ", ".join(fmt) + " ago"

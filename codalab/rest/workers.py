@@ -191,14 +191,16 @@ def finalize_bundle(worker_id, uuid):
                                 request.json['exitcode'],
                                 request.json['failure_message'])
 
-@get('/workers/info', name='worker_info', apply=AuthenticatedPlugin())
-def worker_info():
-    '''
+@get('/workers/info', name='workers_info', apply=AuthenticatedPlugin())
+def workers_info():
     if request.user.user_id != local.model.root_user_id:
         abort(httplib.UNAUTHORIZED, 'User is not root user')
-    '''
+
     data = local.worker_model.get_workers()
+
+    # edit entries in data to make them suitable for human reading
     for worker in data:
+        # checkin_time: seconds since epoch
         worker['checkin_time'] = int((worker['checkin_time'] - datetime.utcfromtimestamp(0)).total_seconds())
         del worker['dependencies']
 

@@ -61,7 +61,6 @@ from codalab.lib.cli_util import (
     nested_dict_get,
     parse_target_spec,
     desugar_command,
-    ReadableDateTimeDelta,
 )
 from codalab.objects.permission import (
     group_permissions_str,
@@ -910,23 +909,23 @@ class BundleCLI(object):
     )
     def do_workers_command(self, args):
         client = self.manager.current_client()
-        raw_worker_info = client.get_worker_info()
+        raw_info = client.get_workers_info()
 
-        columns = ['worker_id', 'last_checkin', 'cpus', 'gpus', 'memory_bytes', 'tag']
+        columns = ['worker_id', 'cpus', 'gpus', 'memory_bytes', 'last_checkin', 'tag']
 
         data = []
-        for worker in raw_worker_info:
+
+        for worker in raw_info:
             data.append({
                 'worker_id': worker['worker_id'],
-                'last_checkin': '{}s ago'.format(time.time() - worker['checkin_time']),
-                'checkin_time': worker['checkin_time'],
-                'cpus': '{} / {}'.format(worker['cpus_in_use'], worker['cpus']),
-                'gpus': '{} / {}'.format(worker['gpus_in_use'], worker['gpus']),
-                'memory_bytes': worker['memory_bytes'],
+                'cpus': '{}/{}'.format(worker['cpus_in_use'], worker['cpus']),
+                'gpus': '{}/{}'.format(worker['gpus_in_use'], worker['gpus']),
+                'memory_bytes': formatting.size_str(worker['memory_bytes']),
+                'last_checkin': '{} ago'.format(formatting.duration_str(int(time.time()) - worker['checkin_time'])),
                 'tag': worker['tag'],
             })
 
-        print >>self.stdout, 'Worker Info:'
+        print >>self.stdout, 'Workers Info:'
         self.print_table(columns, data)
 
     @Commands.command(
